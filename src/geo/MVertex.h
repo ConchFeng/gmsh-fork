@@ -121,6 +121,8 @@ public:
                 double scalingFactor = 1.0);
   void writeVTK(FILE *fp, bool binary = false, double scalingFactor = 1.0,
                 bool bigEndian = false);
+  void writeVTKSteam(std::ostream &os, bool binary = false,
+                     double scalingFactor = 1.0, bool bigEndian = false);
   void writeMATLAB(FILE *fp, int type, bool binary, double scalingFactor = 1.0);
   void writeTOCHNOG(FILE *fp, int dim, double scalingFactor = 1.0);
   void writeMESH(FILE *fp, double scalingFactor = 1.0);

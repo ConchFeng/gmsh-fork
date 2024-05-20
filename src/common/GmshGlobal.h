@@ -45,6 +45,7 @@ int GmshClearProject();
 int GmshMergeFile(const std::string &fileName);
 int GmshMergePostProcessingFile(const std::string &fileName);
 int GmshWriteFile(const std::string &fileName);
+int GmshWriteSteam(std::ostream &os);
 int GmshFinalize();
 int GmshBatch();
 int GmshFLTK(int argc = 0, char **argv = nullptr);

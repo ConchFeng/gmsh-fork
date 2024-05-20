@@ -883,6 +883,9 @@ public:
   int writeVTK(const std::string &name, bool binary = false,
                bool saveAll = false, double scalingFactor = 1.0,
                bool bigEndian = false);
+  // conch add
+  int writeVTKSteam(std::ostream &os, bool binary = false, bool saveAll = false,
+                    double scalingFactor = 1.0, bool bigEndian = false);
 
   // Matlab format
   int writeMATLAB(const std::string &name, bool binary = false,

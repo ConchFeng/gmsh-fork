@@ -107,6 +107,12 @@ namespace gmsh { // Top-level functions
   // Write a file. The export format is determined by the file extension.
   GMSH_API void write(const std::string & fileName);
 
+  // gmsh::write
+  //
+  // Write to an output stream. The export format is determined by the file
+  // extension.
+  GMSH_API void write(std::ostream &os);
+
   // gmsh::clear
   //
   // Clear all loaded models and post-processing data, and add a new empty model.

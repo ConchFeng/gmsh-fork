@@ -854,3 +854,25 @@ void CreateOutputFile(const std::string &fileName, int format,
   if(status && !error)
     Msg::StatusBar(true, "Done writing '%s'", name.c_str());
 }
+
+void CreateOutputSteam(std::ostream &os, int format, bool status)
+{
+  bool error = false;
+
+  if(status) Msg::StatusBar(true, "Writing VTK...");
+
+  switch(format) {
+  case FORMAT_VTK:
+    GModel::current()->writeVTKSteam(
+      os, CTX::instance()->mesh.binary, CTX::instance()->mesh.saveAll,
+      CTX::instance()->mesh.scalingFactor, CTX::instance()->bigEndian);
+    break;
+
+  default:
+    Msg::Error("Unknown output file format");
+    error = true;
+    break;
+  }
+
+  if(status && !error) Msg::StatusBar(true, "Done writing VTK");
+}

@@ -240,6 +240,12 @@ int GmshWriteFile(const std::string &fileName)
   return 1;
 }
 
+int GmshWriteSteam(std::ostream &os)
+{
+  CreateOutputSteam(os, FORMAT_VTK); // Assuming you want to write in VTK format
+  return 1;
+}
+
 int GmshFinalize()
 {
   // delete all models and views

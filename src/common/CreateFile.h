@@ -17,5 +17,6 @@ std::string GetDefaultFileName(int format);
 std::string GetKnownFileFormats(bool onlyMeshFormats = false);
 void CreateOutputFile(const std::string &fileName, int format,
                       bool status = true);
+void CreateOutputSteam(std::ostream &os, int format, bool status = true);
 
 #endif

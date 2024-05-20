@@ -471,6 +471,8 @@ public:
   virtual void writeUNV(FILE *fp, int num = 0, int elementary = 1,
                         int physical = 1);
   virtual void writeVTK(FILE *fp, bool binary = false, bool bigEndian = false);
+  virtual void writeVTKSteam(std::ostream &os, bool binary = false,
+                             bool bigEndian = false);
   virtual void writeMATLAB(FILE *fp, int filetype, int elementary = 0,
                            int physical = 0, bool binary = false);
   virtual void writeTOCHNOG(FILE *fp, int num);

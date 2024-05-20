@@ -1708,6 +1708,38 @@ void MElement::writeVTK(FILE *fp, bool binary, bool bigEndian)
   }
 }
 
+void MElement::writeVTKSteam(std::ostream &os, bool binary, bool bigEndian)
+{
+  if(!getTypeForVTK()) return;
+
+  int n = getNumVertices();
+  if(binary) {
+    int verts[60];
+    verts[0] = n;
+    for(int i = 0; i < n; i++) {
+      verts[i + 1] = static_cast<int>(getVertexVTK(i)->getIndex()) - 1;
+    }
+    // VTK always expects big endian binary data
+    if(!bigEndian)
+      SwapBytes(reinterpret_cast<char *>(verts), sizeof(int), n + 1);
+    os.write(reinterpret_cast<const char *>(verts), sizeof(int) * (n + 1));
+  }
+  else {
+    // Create a buffer to hold the formatted string
+    char buffer[1024];
+    char *ptr = buffer;
+    int written = std::sprintf(ptr, "%d", n);
+    ptr += written;
+
+    for(int i = 0; i < n; i++) {
+      written = std::sprintf(ptr, " %ld", getVertexVTK(i)->getIndex() - 1);
+      ptr += written;
+    }
+    std::sprintf(ptr, "\n");
+    os.write(buffer, std::strlen(buffer));
+  }
+}
+
 void MElement::writeMATLAB(FILE *fp, int filetype, int elementary, int physical,
                            bool binary)
 {

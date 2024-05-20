@@ -213,6 +213,14 @@ GMSH_API void gmsh::write(const std::string &fileName)
     Msg::Error("Could not write file '%s'", fileName.c_str());
 }
 
+GMSH_API void gmsh::write(std::ostream &os)
+{
+  if(!_checkInit()) return;
+  if(!GmshWriteSteam(os)) {
+    Msg::Error("Could not write to the provided output stream");
+  }
+}
+
 GMSH_API void gmsh::clear()
 {
   if(!_checkInit()) return;

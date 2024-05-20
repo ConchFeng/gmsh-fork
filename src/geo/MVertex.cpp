@@ -6,6 +6,9 @@
 #include <string.h>
 #include <cmath>
 #include "MVertex.h"
+
+#include <iomanip>
+
 #include "GModel.h"
 #include "GVertex.h"
 #include "GEdge.h"
@@ -237,6 +240,24 @@ void MVertex::writeVTK(FILE *fp, bool binary, double scalingFactor,
   else {
     fprintf(fp, "%.16g %.16g %.16g\n", x() * scalingFactor, y() * scalingFactor,
             z() * scalingFactor);
+  }
+}
+
+void MVertex::writeVTKSteam(std::ostream &os, bool binary, double scalingFactor,
+                            bool bigEndian)
+{
+  if(_index < 0) return; // negative index vertices are never saved
+
+  if(binary) {
+    double data[3] = {x() * scalingFactor, y() * scalingFactor,
+                      z() * scalingFactor};
+    // VTK always expects big endian binary data
+    if(!bigEndian) SwapBytes(reinterpret_cast<char *>(data), sizeof(double), 3);
+    os.write(reinterpret_cast<const char *>(data), sizeof(double) * 3);
+  }
+  else {
+    os << std::setprecision(16) << x() * scalingFactor << " "
+       << y() * scalingFactor << " " << z() * scalingFactor << "\n";
   }
 }
 

@@ -128,6 +128,110 @@ int GModel::writeVTK(const std::string &name, bool binary, bool saveAll,
   return 1;
 }
 
+int GModel::writeVTKSteam(std::ostream &os, bool binary, bool saveAll,
+                          double scalingFactor, bool bigEndian)
+{
+  if(noPhysicalGroups()) saveAll = true;
+
+  // get the number of vertices and index the vertices in a continuous
+  // sequence
+  int numVertices = indexMeshVertices(saveAll);
+
+  os << "# vtk DataFile Version 2.0\n";
+  os << getName() << ", Created by Gmsh " << GMSH_VERSION << "\n";
+  if(binary)
+    os << "BINARY\n";
+  else
+    os << "ASCII\n";
+  os << "DATASET UNSTRUCTURED_GRID\n";
+
+  // get all the entities in the model
+  std::vector<GEntity *> entities;
+  getEntities(entities);
+
+  // write mesh vertices
+  os << "POINTS " << numVertices << " double\n";
+  for(std::size_t i = 0; i < entities.size(); i++)
+    for(std::size_t j = 0; j < entities[i]->mesh_vertices.size(); j++)
+      entities[i]->mesh_vertices[j]->writeVTKSteam(os, binary, scalingFactor,
+                                                   bigEndian);
+  os << "\n";
+
+  // loop over all elements we need to save and count vertices
+  int numElements = 0, totalNumInt = 0;
+  for(std::size_t i = 0; i < entities.size(); i++) {
+    if(entities[i]->physicals.size() || saveAll) {
+      for(std::size_t j = 0; j < entities[i]->getNumMeshElements(); j++) {
+        if(entities[i]->getMeshElement(j)->getTypeForVTK()) {
+          numElements++;
+          totalNumInt += entities[i]->getMeshElement(j)->getNumVertices() + 1;
+        }
+      }
+    }
+  }
+
+  // print vertex indices in ascii or binary
+  os << "CELLS " << numElements << " " << totalNumInt << "\n";
+  for(std::size_t i = 0; i < entities.size(); i++) {
+    if(entities[i]->physicals.size() || saveAll) {
+      for(std::size_t j = 0; j < entities[i]->getNumMeshElements(); j++) {
+        if(entities[i]->getMeshElement(j)->getTypeForVTK())
+          entities[i]->getMeshElement(j)->writeVTKSteam(os, binary, bigEndian);
+      }
+    }
+  }
+  os << "\n";
+
+  bool havePhysicals = false;
+  std::vector<int> physicals;
+
+  // print element types in ascii or binary
+  os << "CELL_TYPES " << numElements << "\n";
+  for(std::size_t i = 0; i < entities.size(); i++) {
+    if(entities[i]->physicals.size() || saveAll) {
+      for(std::size_t j = 0; j < entities[i]->getNumMeshElements(); j++) {
+        int type = entities[i]->getMeshElement(j)->getTypeForVTK();
+        if(type) {
+          if(binary) {
+            // VTK always expects big endian binary data
+            if(!bigEndian) SwapBytes((char *)&type, sizeof(int), 1);
+            os.write(reinterpret_cast<const char *>(&type), sizeof(int));
+          }
+          else {
+            os << type << "\n";
+          }
+          if(entities[i]->physicals.size()) {
+            physicals.push_back(entities[i]->physicals[0]);
+            havePhysicals = true;
+          }
+          else {
+            physicals.push_back(-1);
+          }
+        }
+      }
+    }
+  }
+
+  if(havePhysicals && numElements == (int)physicals.size()) {
+    os << "\n";
+    os << "CELL_DATA " << numElements << "\n";
+    os << "SCALARS CellEntityIds int 1\n";
+    os << "LOOKUP_TABLE default\n";
+    for(int i = 0; i < numElements; i++) {
+      int type = physicals[i];
+      if(binary) {
+        // VTK always expects big endian binary data
+        if(!bigEndian) SwapBytes((char *)&type, sizeof(int), 1);
+        os.write(reinterpret_cast<const char *>(&type), sizeof(int));
+      }
+      else {
+        os << type << "\n";
+      }
+    }
+  }
+  return 1;
+}
+
 int GModel::readVTK(const std::string &name, bool bigEndian)
 {
   FILE *fp = Fopen(name.c_str(), "rb");
